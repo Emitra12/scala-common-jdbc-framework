@@ -1,0 +1,16 @@
+{
+  "source": {
+    "driver": "oracle.jdbc.driver.OracleDriver",
+    "url": "<jdbc url>",
+    "user": "xxxx",
+    "password": "xxxxxx",
+    "query": "ODS_SL.ICSR1I02"
+  },
+  "target":  {
+    "outputPath": "/edh/dev/data/selexdb/raw/selex/",
+    "format": "parquet",
+    "transformationQuery": "select *,year(CDC_TIMESTAMP) as year,month(CDC_TIMESTAMP) as month,day(CDC_TIMESTAMP) as day",
+    "maxRecordsPerFile": 10000000,
+    "tableName": "ICSR1I02"
+  }
+}

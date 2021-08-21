@@ -1,0 +1,16 @@
+{
+  "source": {
+    "driver": "com.mysql.jdbc.Driver",
+    "url": "jdbc:mysql://localhost:3306/arb",
+    "user": "root",
+    "password": "Summer#12",
+    "query": "(select * from arb.icsr100) as A"
+  },
+  "target": {
+    "outputPath": "hdfs://127.0.0.1:9000/",
+    "format": "parquet",
+    "transformationQuery": "select *, cast(date_part as string) as CDC_TIMESTAMP,year(date_part) as year,month(date_part) as month,day(date_part) as day",
+    "maxRecordsPerFile": 10000000,
+    "tableName": "arb_demo_jo_parquert_files"
+  }
+}
