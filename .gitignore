@@ -1,0 +1,42 @@
+target
+*.jar
+*.war
+*.ear
+*.class
+
+## eclipse specific git ignore
+*.pyc
+*.log
+*.project
+*.old
+*.jar
+*.settings
+.classpath
+.settings/
+.project
+.metadata
+*.tmp
+*.bak
+*.swp
+*~.nib
+
+## intellij
+.idea
+*.iml
+
+## maven
+log/
+target/
+dependency-reduced-pom.xml
+pom.xml.releaseBackup
+release.properties
+
+# Spark
+spark-warehouse/
+metastore_db/
+
+# External tool builders
+.externalToolBuilders/
+
+# Locally stored "Eclipse launch configurations"
+*.launch
