@@ -10,7 +10,8 @@ package object jdbcOracleToMapRFS {
                      user: String,
                      password: String,
                      query: String,
-                     schema: Option[StructType]
+                     schema: Option[StructType],
+                     schema_new: String
                    )
 
   case class Target(

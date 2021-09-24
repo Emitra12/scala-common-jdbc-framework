@@ -1,23 +1,13 @@
 package com.sa.alrajhi.app
 
 import com.sa.alrajhi.jdbcOracleToMapRFS.jdbcOracleToMapRFSConf
+import org.apache.spark.sql.SaveMode
 
 object JdbcOracleToHdfs extends Application[jdbcOracleToMapRFSConf] {
 
   def main(args: Array[String]): Unit = {
 
     val conf: jdbcOracleToMapRFSConf = contextProvider.configuration
-
-    println("#--Configuraion parameters value from json config file--#")
-
-        println(conf.source.driver)
-        println(conf.source.url)
-        println(conf.source.query)
-        println(conf.target.outputPath)
-        println(conf.target.format)
-        println(conf.target.maxRecordsPerFile)
-        println(conf.target.tableName)
-        println(conf.target.transformationQuery)
 
     val sourceOracleDF = spark.read.format("jdbc")
       .option("driver", conf.source.driver)
@@ -26,21 +16,26 @@ object JdbcOracleToHdfs extends Application[jdbcOracleToMapRFSConf] {
       .option("user", conf.source.user)
       .option("password", conf.source.password)
       .load()
-      .cache()
+
+    println("#--Total records extracted from OracleDB Table "+ conf.target.tableName +": "+ sourceOracleDF.count())
 
     val tranformedOracleDF = sourceOracleDF.createOrReplaceTempView("sourceOracleTable")
 
-    val dfWithPartitionColums = spark.sql(conf.target.transformationQuery + " from sourceOracleTable")
+    val withPartitionColumsDF = spark.sql(conf.target.transformationQuery + " from sourceOracleTable")
 
-    val targetDFWithParquet = dfWithPartitionColums
+    val writeParqueInMapRFSDF = withPartitionColumsDF
       .write
+      .mode(SaveMode.Overwrite)
       .partitionBy("year", "month", "day")
       .option("maxRecordsPerFile", conf.target.maxRecordsPerFile)
       .parquet(conf.target.outputPath + conf.target.tableName)
 
-    val sourceOracleCountDF = sourceOracleDF.count()
+    println("#--Total records written in MapR-FS for table "+ conf.target.tableName +": "+ withPartitionColumsDF.count())
 
-    println("#--Total records imported in HPE MapR-FS from OracleDB Table "+ conf.target.tableName +": "+ sourceOracleCountDF)
+    // Creating Hive external table and repair table after creation
+    createHiveExternalTable.createHiveTable(sourceOracleDF)
+    // Inserting data into Ingestion metadata table
+    createHiveExternalTable.ingestionMetaDataAuditTable(sourceOracleDF)
 
   }
 }
